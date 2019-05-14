@@ -124,7 +124,7 @@ The coroutines created by this library are constrained. They cannot be treated a
 
 <h4> Stackfulness </h4>
 
-This coroutine library allows stop-and-resume control transfer, and so is stackful.
+Coroutines all run on the same stack. The coroutines can be suspended and resumed from within nested functions.
 
 
 
