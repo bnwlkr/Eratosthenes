@@ -116,7 +116,7 @@ Another potential reason to use coroutines for the sieve is in a streaming situa
 
 <h4> Control Transfer Mechanism </h4>
 
-This coroutine library allows asymmetric coroutines, i.e. coroutines can pass control to eachother using coto.
+This coroutine library creates symmetric coroutines, i.e. coroutines can pass control to eachother using coto.
 
 <h4> Class </h4>
 
