@@ -6,6 +6,7 @@
 #include <setjmp.h>
 #include <math.h>
 #include <string.h>
+#include "utils.h"
 
 
 #define STACKDIR - // set to + for upwards and - for downwards
@@ -40,21 +41,11 @@ static int n;
 // spawn a coroutine to filter this prime's multiples
 static void filter (void * arg) {
   int p = *(int*)arg;
-  printf("in filterer for: %d\n", p);
+  // printf("in filterer for: %d\n", p);
   for (int i = pow(p,2); i<=n; i+=p) {
     primes[i] = 1;
   }
   coto(thread[1], thread[0], (char*) arg + 2);
-}
-
-void print(char * array, int size) {
-  printf("[");
-  for (int i = 0; i < size; i++) {
-    if (array[i] == 0) {
-      printf(" %d ", i);
-    }
-  }
-  printf("]\n");
 }
 
 
@@ -67,10 +58,10 @@ int main(int argc, char* argv[]) {
   primes[1] = 1;
   for (int p = 2; p <= sqrt(n); p++) {
     if (!primes[p]) {
-      printf("spawning filterer for: %d\n", p);
+      // printf("spawning filterer for: %d\n", p);
       prime = p;
       cogo(thread[0], filter, &prime);
-      printf("back in main\n");
+      // printf("back in main\n");
     }
   }
   print(primes, n+1);

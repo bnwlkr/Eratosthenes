@@ -3,18 +3,9 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include "utils.h"
 
 // generate prime numbers up to n be filtering with subroutines
-
-void print(char * array, int size) {
-  printf("[");
-  for (int i = 0; i < size; i++) {
-    if (array[i] == 0) {
-      printf(" %d ", i);
-    }
-  }
-  printf("]\n");
-}
 
 void filter(char ** primes, int p, int n) {
   for (int i = pow(p,2); i<=n; i+=p) {
