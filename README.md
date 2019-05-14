@@ -112,8 +112,19 @@ Another potential reason to use coroutines for the sieve is in a streaming situa
 
 <h5>TODO: compare my sieve with sieves implemented using other (production-ready) coroutine libraries</h5>
 
+<h2>Classification of Coroutines</h2>
 
+<h4> Control Transfer Mechanism </h4>
 
+This coroutine library allows asymmetric coroutines, i.e. coroutines can pass control to eachother using coto.
+
+<h4> Class </h4>
+
+The coroutines created by this library are constrained. They cannot be treated as first-class objects.
+
+<h4> Stackfulness </h4>
+
+This coroutine library allows stop-and-resume control transfer, and so is stackful.
 
 
 
