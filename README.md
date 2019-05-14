@@ -106,7 +106,7 @@ To paraphrase my professor, the coroutined implementation doesn't provide any ad
 
 <h5>TODO: test this assumption with threads</h3>
 
-Another potential reason to use coroutines for the sieve is in a streaming situation. If we aren't sure how many prime numbers we need when the program starts, using subroutines would become problematic. We would start filtering all of the factors of 2 until... forever. If we stopped at some pre-defined bound we would have to keep track of where each filtering subroutine was in the process, which would basically make them centrally-coordinated coroutines. Filtering coroutines could instead periodically yield their results to their filtering coroutine friends in a filtering pipeline (while automatically remembering where they were in their computations). This would allow the program to output a continuous stream of prime numbers indefinitely.
+Another potential reason to use coroutines for the sieve is in a streaming situation. If we aren't sure how many prime numbers we need when the program starts, using subroutines would become problematic. We would start filtering all of the factors of 2 until... forever. If we stopped at some pre-defined bound we would have to keep track of where each filtering subroutine was in the process, which would basically make them centrally-coordinated coroutines. Filtering coroutines could instead periodically yield their results to their filtering coroutine friends in a filtering pipeline (while automatically remembering where they were in their computations). This would allow the program to output a continuous stream of prime numbers indefinitely (a [generator](https://matthias.benkard.de/journal/116)).
 
 <h5>TODO: implement a streaming sieve</h5>
 
