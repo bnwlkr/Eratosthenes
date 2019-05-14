@@ -23,6 +23,7 @@ void filter(char ** primes, int p, int n) {
 }
 
 int main (int argc, char * argv[]) {
+  if (argc < 2) { printf("too few arguments\n"); exit(EXIT_FAILURE); }
   int n = atoi(argv[1]);
   char * primes = malloc((n+1)*sizeof(char));
   memset(primes, 0, n+1);
