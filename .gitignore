@@ -1,2 +1,4 @@
 .DS_Store
 *.o
+sieve_sub
+sieve_co_array
