@@ -1,6 +1,36 @@
 # Eratosthenes
 
-This is a report on an implementation of the Sieve of Eratosthenes (for UBC directed studies) using a [tiny coroutine library](https://fanf.livejournal.com/105413.html) in standard C.
+This is a report on an implementation of the Sieve of Eratosthenes (for UBC directed studies) using a [tiny coroutine library](https://fanf.livejournal.com/105413.html) in standard C. Here is the code:
+
+```
+#define STACKDIR - // set to + for upwards and - for downwards
+#define STACKSIZE (1<<12)
+
+static jmp_buf thread[1000];
+static void *coarg;
+static char *tos; // top of stack
+static char * primes;
+static int prime;
+static int n;
+
+void *coto(jmp_buf here, jmp_buf there, void *arg) {
+  coarg = arg;
+  if (setjmp(here)) { return(coarg); }
+  longjmp(there, 1);
+}
+
+void *cogo(jmp_buf here, void (*fun)(void*), void *arg) {
+  if (tos == NULL) { tos = (char*)&arg; }
+  tos += STACKDIR STACKSIZE;
+  char n[STACKDIR (tos - (char*)&arg)];
+  coarg = n; // ensure optimizer keeps n
+  if (setjmp(here)) { return(coarg); }
+  fun(arg);
+  abort();
+}
+```
+
+`cogo` initializes coroutines, and `coto` passes control between them. 
 
 I started by implementing a subroutine (normal function calls) version of the sieve to familiarize myself with how it works and to make comparisons with the coroutine version. 
 
@@ -30,35 +60,10 @@ int main (int argc, char * argv[]) {
 
 After looking at the example at the example provided by Tony Finch in the link above, I started implementing the coroutined version. The coroutined version simply spawns a new worker every time it encounters a prime, in order to filter out its multiples.
 
+
 <h2>sieve_co_array</h2>
 
 ```
-#define STACKDIR - // set to + for upwards and - for downwards
-#define STACKSIZE (1<<12)
-
-static jmp_buf thread[1000];
-static void *coarg;
-static char *tos; // top of stack
-static char * primes;
-static int prime;
-static int n;
-
-void *coto(jmp_buf here, jmp_buf there, void *arg) {
-  coarg = arg;
-  if (setjmp(here)) { return(coarg); }
-  longjmp(there, 1);
-}
-
-void *cogo(jmp_buf here, void (*fun)(void*), void *arg) {
-  if (tos == NULL) { tos = (char*)&arg; }
-  tos += STACKDIR STACKSIZE;
-  char n[STACKDIR (tos - (char*)&arg)];
-  coarg = n; // ensure optimizer keeps n
-  if (setjmp(here)) { return(coarg); }
-  fun(arg);
-  abort();
-}
-
 static void filter (void * arg) {
   int p = *(int*)arg;
   for (int i = pow(p,2); i<=n; i+=p) {
@@ -110,13 +115,12 @@ Another potential reason to use coroutines for the sieve is in a streaming situa
 
 <h5>TODO: implement a streaming sieve</h5>
 
-<h5>TODO: compare my sieve with sieves implemented using other (production-ready) coroutine libraries</h5>
 
 <h2>Classification of Coroutines</h2>
 
 <h4> Control Transfer Mechanism </h4>
 
-This coroutine library creates symmetric coroutines, i.e. coroutines can pass control to eachother using coto.
+This coroutine library creates symmetric coroutines, i.e. coroutines can pass control to eachother using `coto`.
 
 <h4> Class </h4>
 
