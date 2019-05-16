@@ -20,7 +20,7 @@ int main (int argc, char * argv[]) {
   memset(primes, 0, n+1);
   primes[0] = 1;
   primes[1] = 1;
-  for (int p = 2; p <= sqrt(n); p++) {ß
+  for (int p = 2; p <= sqrt(n); p++) {
     if (!primes[p]) {
       filter(&primes, p, n);
     }

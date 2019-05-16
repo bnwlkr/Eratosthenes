@@ -16,10 +16,11 @@ static jmp_buf thread[1000];
 static void *coarg;
 static char *tos; // top of stack
 static char * primes;
+static int prime;
+static int n;
 
 void *coto(jmp_buf here, jmp_buf there, void *arg) {
   coarg = arg;
-  printf("in coto\n");
   if (setjmp(here)) { return(coarg); }
   longjmp(there, 1);
 }
@@ -33,10 +34,6 @@ void *cogo(jmp_buf here, void (*fun)(void*), void *arg) {
   fun(arg);
   abort();
 }
-
-static int prime;
-static int n;
-
 
 // spawn a coroutine to filter this prime's multiples
 static void filter (void * arg) {
