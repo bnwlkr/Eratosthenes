@@ -131,7 +131,90 @@ Coroutines all run on the same stack. The coroutines can be suspended and resume
 
 <h2> A streaming sieve </h2>
 
+Following up on the discussion about streaming scenarios above, I decided to implement my own prime number streamer using the [libaco](https://github.com/hnes/libaco) coroutine library. Here is the code:
 
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "aco.h"
+
+
+#define WORKERS_INCREMENT 10
+
+enum Task {RUN_NEXT, RESTART} task;
+
+struct Worker {
+  aco_t* routine;
+  int pipe;
+};
+
+struct Worker * workers;
+static int num_workers = 1;
+static int worker_capacity = WORKERS_INCREMENT;
+
+void worker() {
+  struct Worker * self = (struct Worker *) aco_get_arg();
+  int idx = (self - workers) / sizeof(struct Worker);
+  int prime = self->pipe;
+  printf("%d\n", prime);
+  task = RESTART;
+  aco_yield();
+  while (1) {
+    int num = self->pipe;
+    assert(num);
+    if (num % prime != 0) {
+      if (idx == num_workers-1) { // this is the current last in the pipeline
+        if (idx == worker_capacity-1) { // worker capacity reached
+          workers = realloc(workers, (worker_capacity + WORKERS_INCREMENT) * sizeof(struct Worker));
+          if (!workers) {
+            perror("couldn't reallocate workers\n");
+            exit(EXIT_FAILURE);
+          }
+        }
+        workers[idx+1] = (struct Worker) {.routine = aco_create(self->routine->main_co, self->routine->share_stack, 0, worker, &workers[idx+1]), .pipe = num};
+        task = RUN_NEXT;
+        aco_yield();
+      } else {
+        workers[idx+1].pipe = num; // send the value to the next worker
+        task = RUN_NEXT;
+        aco_yield();
+      }
+    } else {
+      task = RESTART;
+      aco_yield();
+    }
+  }
+}
+
+
+int main() {  
+  aco_thread_init(NULL);
+  aco_t* main_co = aco_create(NULL, NULL, 0, NULL, NULL);
+  aco_share_stack_t* sstk = aco_share_stack_new(0);
+  workers = malloc(WORKERS_INCREMENT * sizeof(struct Worker));
+  workers[0] = (struct Worker) {.routine = aco_create(main_co, sstk, 0, worker, &workers[0])};
+  int next = 2;
+  while (1) {
+    int worker_idx = 0;
+    workers[0].pipe = next++;
+    aco_resume(workers[0].routine); // start the first worker
+    switch(task) {
+      case RUN_NEXT:
+        aco_resume(workers[++worker_idx].routine);
+      case RESTART:
+        continue;
+    }
+  }
+}
+```
+
+This prints out prime numbers indefinitely - or until there is no more space for new filtering coroutines (workers) on the heap.
+
+<h2> libuv </h2>
+
+ 
 
 
 
