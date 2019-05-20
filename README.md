@@ -32,9 +32,9 @@ void *cogo(jmp_buf here, void (*fun)(void*), void *arg) {
 
 `cogo` initializes coroutines, and `coto` passes control between them. 
 
-I started by implementing a subroutine (normal function calls) version of the sieve to familiarize myself with how it works and to make comparisons with the coroutine version. 
+<h2>Array-based Subroutine Sieve</h2>
 
-<h2>sieve_sub</h2>
+I started by implementing a subroutine (normal function calls) version of the sieve to familiarize myself with how it works and to make comparisons with the coroutine version. 
 
 ```
 void filter(char ** primes, int p, int n) {
@@ -58,10 +58,10 @@ int main (int argc, char * argv[]) {
 }
 ```
 
+<h2>Array-based Coroutine Sieve</h2>
+
 After looking at the example at the example provided by Tony Finch in the link above, I started implementing the coroutined version. The coroutined version simply spawns a new worker every time it encounters a prime, in order to filter out its multiples.
 
-
-<h2>sieve_co_array</h2>
 
 ```
 static void filter (void * arg) {
@@ -129,7 +129,7 @@ The coroutines created by this library are constrained. They cannot be treated a
 
 Coroutines all run on the same stack. The coroutines can be suspended and resumed from within nested functions.
 
-<h2> A streaming sieve </h2>
+<h2> A Streaming Sieve </h2>
 
 Following up on the discussion about streaming scenarios above, I decided to implement my own prime number streamer using the [libaco](https://github.com/hnes/libaco) coroutine library. Here is the code:
 
