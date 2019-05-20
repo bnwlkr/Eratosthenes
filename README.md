@@ -113,10 +113,9 @@ To paraphrase my professor, the coroutined implementation doesn't provide any ad
 
 Another potential reason to use coroutines for the sieve is in a streaming situation. If we aren't sure how many prime numbers we need when the program starts, using subroutines would become problematic. We would start filtering all of the factors of 2 until... forever. If we stopped at some pre-defined bound we would have to keep track of where each filtering subroutine was in the process, which would basically make them centrally-coordinated coroutines. Filtering coroutines could instead periodically yield their results to their filtering coroutine friends in a filtering pipeline (while automatically remembering where they were in their computations). This would allow the program to output a continuous stream of prime numbers indefinitely (a [generator](https://matthias.benkard.de/journal/116)).
 
-<h5>TODO: implement a streaming sieve</h5>
+<h2>Classification of Small Portable Coroutines</h2>
 
-
-<h2>Classification of Coroutines</h2>
+I will attempt to classify the miniature coroutine library according to [this](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf) paper.
 
 <h4> Control Transfer Mechanism </h4>
 
@@ -130,7 +129,7 @@ The coroutines created by this library are constrained. They cannot be treated a
 
 Coroutines all run on the same stack. The coroutines can be suspended and resumed from within nested functions.
 
-
+<h2> A streaming sieve </h2>
 
 
 
