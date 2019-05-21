@@ -5,7 +5,7 @@
 #include "aco.h"
 
 
-#define WORKERS_INCREMENT 10 // the number of new workers to allocate when the current number is exchausted
+#define WORKERS_INCREMENT 10
 
 enum Task {RUN_NEXT, RESTART} task;
 
@@ -51,9 +51,6 @@ void worker() {
     }
   }
 }
-
-
-
 
 
 int main() {  

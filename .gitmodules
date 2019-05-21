@@ -1,3 +1,9 @@
 [submodule "libaco"]
 	path = libaco
 	url = https://github.com/hnes/libaco.git
+[submodule "libuv"]
+	path = libuv
+	url = https://github.com/libuv/libuv.git
+[submodule "set"]
+	path = set
+	url = https://github.com/barrust/set.git
