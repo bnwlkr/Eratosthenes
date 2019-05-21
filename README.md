@@ -32,9 +32,9 @@ void *cogo(jmp_buf here, void (*fun)(void*), void *arg) {
 
 `cogo` initializes coroutines, and `coto` passes control between them. 
 
-I started by implementing a subroutine (normal function calls) version of the sieve to familiarize myself with how it works and to make comparisons with the coroutine version. 
+<h2>Array-based Subroutine Sieve</h2>
 
-<h2>sieve_sub</h2>
+I started by implementing a subroutine (normal function calls) version of the sieve to familiarize myself with how it works and to make comparisons with the coroutine version. 
 
 ```
 void filter(char ** primes, int p, int n) {
@@ -58,10 +58,10 @@ int main (int argc, char * argv[]) {
 }
 ```
 
+<h2>Array-based Coroutine Sieve</h2>
+
 After looking at the example at the example provided by Tony Finch in the link above, I started implementing the coroutined version. The coroutined version simply spawns a new worker every time it encounters a prime, in order to filter out its multiples.
 
-
-<h2>sieve_co_array</h2>
 
 ```
 static void filter (void * arg) {
@@ -113,10 +113,9 @@ To paraphrase my professor, the coroutined implementation doesn't provide any ad
 
 Another potential reason to use coroutines for the sieve is in a streaming situation. If we aren't sure how many prime numbers we need when the program starts, using subroutines would become problematic. We would start filtering all of the factors of 2 until... forever. If we stopped at some pre-defined bound we would have to keep track of where each filtering subroutine was in the process, which would basically make them centrally-coordinated coroutines. Filtering coroutines could instead periodically yield their results to their filtering coroutine friends in a filtering pipeline (while automatically remembering where they were in their computations). This would allow the program to output a continuous stream of prime numbers indefinitely (a [generator](https://matthias.benkard.de/journal/116)).
 
-<h5>TODO: implement a streaming sieve</h5>
+<h2>Classification of Small Portable Coroutines</h2>
 
-
-<h2>Classification of Coroutines</h2>
+I will attempt to classify the miniature coroutine library according to [this](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf) paper.
 
 <h4> Control Transfer Mechanism </h4>
 
@@ -130,9 +129,92 @@ The coroutines created by this library are constrained. They cannot be treated a
 
 Coroutines all run on the same stack. The coroutines can be suspended and resumed from within nested functions.
 
+<h2> A Streaming Sieve </h2>
+
+Following up on the discussion about streaming scenarios above, I decided to implement my own prime number streamer using the [libaco](https://github.com/hnes/libaco) coroutine library. Here is the code:
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "aco.h"
 
 
+#define WORKERS_INCREMENT 10
 
+enum Task {RUN_NEXT, RESTART} task;
+
+struct Worker {
+  aco_t* routine;
+  int pipe;
+};
+
+struct Worker * workers;
+static int num_workers = 1;
+static int worker_capacity = WORKERS_INCREMENT;
+
+void worker() {
+  struct Worker * self = (struct Worker *) aco_get_arg();
+  int idx = (self - workers) / sizeof(struct Worker);
+  int prime = self->pipe;
+  printf("%d\n", prime);
+  task = RESTART;
+  aco_yield();
+  while (1) {
+    int num = self->pipe;
+    assert(num);
+    if (num % prime != 0) {
+      if (idx == num_workers-1) { // this is the current last in the pipeline
+        if (idx == worker_capacity-1) { // worker capacity reached
+          workers = realloc(workers, (worker_capacity + WORKERS_INCREMENT) * sizeof(struct Worker));
+          if (!workers) {
+            perror("couldn't reallocate workers\n");
+            exit(EXIT_FAILURE);
+          }
+        }
+        workers[idx+1] = (struct Worker) {.routine = aco_create(self->routine->main_co, self->routine->share_stack, 0, worker, &workers[idx+1]), .pipe = num};
+        task = RUN_NEXT;
+        aco_yield();
+      } else {
+        workers[idx+1].pipe = num; // send the value to the next worker
+        task = RUN_NEXT;
+        aco_yield();
+      }
+    } else {
+      task = RESTART;
+      aco_yield();
+    }
+  }
+}
+
+
+int main() {  
+  aco_thread_init(NULL);
+  aco_t* main_co = aco_create(NULL, NULL, 0, NULL, NULL);
+  aco_share_stack_t* sstk = aco_share_stack_new(0);
+  workers = malloc(WORKERS_INCREMENT * sizeof(struct Worker));
+  workers[0] = (struct Worker) {.routine = aco_create(main_co, sstk, 0, worker, &workers[0])};
+  int next = 2;
+  while (1) {
+    int worker_idx = 0;
+    workers[0].pipe = next++;
+    aco_resume(workers[0].routine); // start the first worker
+    switch(task) {
+      case RUN_NEXT:
+        aco_resume(workers[++worker_idx].routine);
+      case RESTART:
+        continue;
+    }
+  }
+}
+```
+
+This prints out prime numbers indefinitely - or until there is no more space for new filtering coroutines (workers) on the heap.
+
+<h2> libuv </h2>
+
+ 
 
 
 
