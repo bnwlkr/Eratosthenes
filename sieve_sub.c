@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
-#include "utils.h"
 
 // generate prime numbers up to n be filtering with subroutines
 
@@ -25,6 +24,12 @@ int main (int argc, char * argv[]) {
       filter(&primes, p, n);
     }
   }
-  print(primes, n+1);
+  printf("[");
+  for (int i = 0; i <= n; i++) {
+    if (primes[i] == 0) {
+      printf(" %d ", i);
+    }
+  }
+  printf("]\n");
   return 0;
 }

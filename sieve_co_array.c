@@ -6,7 +6,6 @@
 #include <setjmp.h>
 #include <math.h>
 #include <string.h>
-#include "utils.h"
 
 
 #define STACKDIR - // set to + for upwards and - for downwards
@@ -61,6 +60,12 @@ int main(int argc, char* argv[]) {
       // printf("back in main\n");
     }
   }
-  print(primes, n+1);
+  printf("[");
+  for (int i = 0; i <= n; i++) {
+    if (primes[i] == 0) {
+      printf(" %d ", i);
+    }
+  }
+  printf("]\n");
   return 0;
 }
