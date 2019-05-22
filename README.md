@@ -210,69 +210,16 @@ int main() {
 }
 ```
 
-This prints out prime numbers indefinitely - or until there is no more space for new filtering coroutines (workers) on the heap.
-
-<h2> A Sieve Server </h2>
-
-The next thing to do was try out [libuv](https://github.com/libuv/libuv). To do this I decided to implement a simple UDP server that responds to requests asking whether or not a given number is prime. Here is the code:
-
-```
-#include <uv.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#define MAX_DATA_SIZE 512
-
-int is_prime(int num) {
-     if (num <= 1) return 0;
-     if (num % 2 == 0 && num > 2) return 0;
-     for(int i = 3; i < num / 2; i+= 2) {
-         if (num % i == 0)
-             return 0;
-     }
-     return 1;
-}
-
-void alloc_recv_buf(uv_handle_t *receive_handle, size_t suggested_size, uv_buf_t *buf) {
-  buf->base = (char*) malloc(sizeof(char)*MAX_DATA_SIZE); 
-  buf->len = MAX_DATA_SIZE;
-}
-
-void udp_recv(uv_udp_t *handle, ssize_t nread, const uv_buf_t *buf, const struct sockaddr *addr, unsigned flags) {
-  char str[MAX_DATA_SIZE];
-  strncpy(str, buf->base, nread);
-  str[nread] = '\0';
-  char * end;
-  int req = (int) strtol(str, &end, 10);
-  uv_buf_t sndbuf;
-  if (is_prime(req)) {
-    sndbuf = uv_buf_init("1", 1);
-  } else {
-    sndbuf = uv_buf_init("0", 1);
-  }
-  uv_udp_send(NULL, handle, &sndbuf, 1, addr, NULL);
-  free(sndbuf.base);
-  free(buf->base);
-}
+This prints out prime numbers indefinitely - or until there is no more space for new filtering coroutines (workers) on the heap. I can modify the code so that it terminates at certain number of primes as in the previous examples by including a `FINISHED` case in the `Task` enum that informs the main_co that it should stop sedning numbers into the pipeline, deallocate all of the workers, and then exit.
 
 
-int main () {
-  struct sockaddr_in server_addr;
-  uv_udp_t udp_handle;
-  uv_loop_t* loop;
-  loop = uv_default_loop();
-  uv_ip4_addr("0.0.0.0", 8000, &server_addr);
-  uv_udp_init(loop, &udp_handle);
-  uv_udp_bind(&udp_handle, (struct sockaddr *)&server_addr, 0);
-  uv_udp_recv_start(&udp_handle, alloc_recv_buf, udp_recv);
-  uv_run(loop, UV_RUN_DEFAULT);
-}
+<h2> libuv sieve </h2>
 
-```
+The next thing to do was to try out the [libuv](github.com/libuv/libuv) library.
 
-The server creates an event loop and registers UDP receipt as an event that the event loop should be interested in. When it receives a request, it simply checks if the numbers is prime and responds accordingly. The next thing to do is to attempt to integrate `libaco` with `libuv`. I don't believe this is possible in a single thread. The `libaco` coroutine stack will likely run in a separate thread to the I/O loop created by `libuv`, and then they will exchange information. I will look into this today.
+
+
+
 
 
 

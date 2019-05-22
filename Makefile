@@ -1,7 +1,7 @@
-sieve_server: sieve_server.c utils.o
-	gcc -g -O2 sieve_server.c  -luv utils.o  -o sieve_server
+sieve_luv: sieve_luv.c 
+	gcc -g -O2 -luv sieve_luv.c -o sieve_luv
 
-sieve_co_stream: sieve_co_stream.c utils.o
+sieve_co_stream: sieve_co_stream.c
 	gcc -g -O2 -Ilibaco/ libaco/acosw.S libaco/aco.c sieve_co_stream.c -o sieve_co_stream
   
 sieve_co_array: sieve_co_array.c utils.o
