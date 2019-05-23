@@ -97,14 +97,28 @@ This prints out prime numbers indefinitely - or until there is no more space for
 The next thing to do was to try out the [libuv](github.com/libuv/libuv) library. This sieve works by having the worker routines be async callbacks registered on a `uv_async_t` handle in the event loop. The workers call eachother to send data down the pipeline. code: [sieve_luv.c](github.com/bnwlkr/Eratosthenes/sieve_luv.c)
 
 
+<h2> MPICH </h2>
+
+Moving on to interprocess communication, I implemented the sieve using `MPICH`, an instance of the Message Passing Interface standard. In this case, the workers are heavy-weight processes that pass eachother numbers in MPI messages. As expected, the overhead to setup the processes and the OS switching between processes during execution makes this implementation pretty slow. Here are the timing results for 10 primes for `sieve_mpi`:
 
 
+```
+real	0m0.272s
+user	0m0.281s
+sys	0m0.254s
+```
 
+And 10 primes using `libuv` callbacks:
 
+```
+real	0m0.007s
+user	0m0.002s
+sys	0m0.003s
+```
 
+Obviously, the point of this part of the investigation is not to compare performance, but its cool to see some evidence of how things are working under the hood. There's a big difference between one thread calling a new function (as in `libuv`) and a context switch between threads (as in `MPICH`)!
 
-
-
+And here's the code: [sieve_mpi.c](github.com/bnwlkr/sieve_mpi.c)
 
 
 
