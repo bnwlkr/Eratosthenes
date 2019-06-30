@@ -17,4 +17,4 @@ sieve_sub: sieve_sub.c
 all: sieve_co_array sieve_sub sieve_co_stream sieve_luv sieve_mpi
 
 clean: 
-	$(RM) *.o sieve_sub sieve_co_array sieve_co_stream sieve_server
+	$(RM) *.o sieve_sub sieve_co_array sieve_co_stream sieve_server sieve_mpi sieve_luv
