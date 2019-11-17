@@ -42,7 +42,7 @@ I started by implementing a subroutine (normal function calls) version of the si
 
 <h4>Array-based Coroutine Sieve</h4>
 
-After looking at the example at the example provided by Tony Finch in the link above, I started implementing the coroutined version. The coroutined version simply spawns a new worker every time it encounters a prime, in order to filter out its multiples. code: [sieve_co_array.c](sieve_co_array.c)
+After looking at the example provided by Tony Finch in the link above, I started implementing the coroutined version. The coroutined version simply spawns a new worker every time it encounters a prime, in order to filter out its multiples. code: [sieve_co_array.c](sieve_co_array.c)
 
 When I started looking into writing a coroutined version of the sieve, I was confused about how the coroutines (instead of subroutines) would yield any improvement in performance. If we start with an array of numbers that need to be filtered for primes, every number needs to be looked at at least once in both cases. If the coroutines are running one after the other, we shouldn't see any improvement in performance (and perhaps a decline in performance because of the slight overhead of dealing with the coroutines). The timing results concur:
 <h5> ./sieve_sub 10000000 </h5>
